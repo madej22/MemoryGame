@@ -12,44 +12,51 @@ struct ContentView: View {
     let emojis = ["🤣", "🥵", "🥶", "😈", "👍", "❤️", "🤓", "😎", "😼", "👽", "🎃", "🧠", "🫠", "🤗", "🥹", "🙃"]
     @State var cardCount = 4
     
-    var cards: some View {
+    var cardDisplay: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 120))]) {
             ForEach(0..<cardCount, id: \.self) {
                 index in CardView(emojiIcon: emojis[index])
-                    .aspectRatio(2/3, contentMode: .fit)
+                    .aspectRatio(4, contentMode: .fit)
             }
         }
         .foregroundColor(.blue)
     }
     
-    var cardAdder: some View {
-        Button("+") {
-            if cardCount < emojis.count-1 {
+    func adjustCardNumber(by offset: Int, symbol: String) -> some View {
+        Button(symbol) {
+            if(offset < 0 && cardCount >= 2) {
+                cardCount -= 2
+            } else if (offset > 0 && cardCount <= emojis.count-2){
                 cardCount += 2
             }
         }
+        .disabled((offset < 0 && cardCount <= 0) || (offset > 0 && cardCount >= emojis.count))
+        .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+        .frame(minWidth: 45, minHeight: 35)
+        .border(.blue, width: 2)
+        .cornerRadius(5)
+    }
+    
+    var cardAdder: some View {
+        adjustCardNumber(by: 2, symbol: "+")
     }
     
     var cardRemover: some View {
-        Button("-") {
-            if cardCount > 2 {
-                cardCount -= 2
-            }
-        }
+        adjustCardNumber(by: -2, symbol: "-")
     }
     
     var cardsCountAdjuster: some View {
         HStack {
-            cardAdder
-            Spacer()
             cardRemover
+            Spacer()
+            cardAdder
         }
     }
     
     var body: some View {
         VStack {
             ScrollView {
-                cards
+                cardDisplay
             }
             cardsCountAdjuster
         }
